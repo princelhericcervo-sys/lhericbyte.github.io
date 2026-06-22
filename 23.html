@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OsintGxGxX_X.OSINT</title>
+<style>
+body { background: #0a0a0a; color: #00ff88; font-family: monospace; padding: 20px; }
+.container { max-width: 800px; margin: 0 auto; border: 1px solid #00ff88; padding: 30px; border-radius: 10px; }
+h1 { color: #ff4444; text-align: center; text-shadow: 0 0 10px #ff4444; }
+.sub { color: #ff8800; text-align: center; }
+input { width: 70%; padding: 10px; background: #111; color: #00ff88; border: 1px solid #00ff88; border-radius: 5px; font-size: 16px; }
+button { background: #00ff88; color: #0a0a0a; padding: 10px 20px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+button:hover { background: #00cc66; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+.grid-item { background: #111; border: 1px solid #00ff88; padding: 10px; text-align: center; border-radius: 5px; color: #00ff88; font-size: 12px; cursor: pointer; }
+.grid-item:hover { background: #00ff88; color: #0a0a0a; }
+.output { margin-top: 20px; padding: 15px; background: #111; border-radius: 5px; white-space: pre-wrap; font-size: 14px; max-height: 400px; overflow-y: auto; }
+.log { color: #aaaaaa; }
+.success { color: #00ff88; }
+.error { color: #ff4444; }
+#loginOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #0a0a0a; display: flex; justify-content: center; align-items: center; z-index: 9999;
+}
+#loginBox {
+    background: #111; border: 1px solid #00ff88; padding: 40px; border-radius: 10px; text-align: center;
+}
+#loginBox input {
+    width: 100%; padding: 10px; margin: 10px 0; background: #0a0a0a;
+    color: #00ff88; border: 1px solid #00ff88; border-radius: 5px;
+}
+#loginBox button { background: #00ff88; color: #0a0a0a; padding: 10px 30px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+#loginBox .error { color: #ff4444; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div id="loginBox">
+        <h2 style="color:#00ff88;">🔒 OsintGxGxX_X.OSINT</h2>
+        <p style="color:#aaaaaa;">Enter password</p>
+        <input type="password" id="passwordInput" placeholder="Password..." autofocus>
+        <button id="loginBtn">▶ UNLOCK</button>
+        <div id="loginError" class="error"></div>
+    </div>
+</div>
+
+<div class="container" id="mainContent" style="display:none;">
+    <h1>🔓 OsintGxGxX_X.OSINT</h1>
+    <p class="sub">[ ROBLOX OSINT MODULE ]</p>
+    <div class="grid">
+        <div class="grid-item" data-mode="scanner">Scanner</div>
+        <div class="grid-item" data-mode="password">Password</div>
+        <div class="grid-item" data-mode="cookie">Cookie</div>
+        <div class="grid-item" data-mode="session">Session</div>
+        <div class="grid-item" data-mode="ip">IP</div>
+        <div class="grid-item" data-mode="breacher">Breacher</div>
+    </div>
+    <input type="text" id="targetInput" placeholder="TARGET (Roblox username)..." autofocus>
+    <button id="hackBtn">▶ EXECUTE HACK</button>
+    <button id="clearBtn" style="background:#444;color:#fff;">✕ CLEAR</button>
+    <div id="progress"><div id="progress-bar"></div></div>
+    <div class="output" id="output">AWAITING TARGET...</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginOverlay = document.getElementById('loginOverlay');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginError = document.getElementById('loginError');
+    const mainContent = document.getElementById('mainContent');
+    const CORRECT_PASSWORD = 'GeneretadeGoodZajtama123';
+
+    function tryLogin() {
+        if (passwordInput.value.trim() === CORRECT_PASSWORD) {
+            loginOverlay.style.display = 'none';
+            mainContent.style.display = 'block';
+            document.getElementById('targetInput').focus();
+        } else {
+            loginError.textContent = '❌ Wrong password.';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+    loginBtn.addEventListener('click', tryLogin);
+    passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+    const input = document.getElementById('targetInput');
+    const hackBtn = document.getElementById('hackBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const output = document.getElementById('output');
+    const progress = document.getElementById('progress');
+    const progressBar = document.getElementById('progress-bar');
+
+    let currentMode = 'scanner';
+
+    const PASSWORD_LENGTHS = [8, 10, 9, 21, 12, 13, 17];
+    const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+    const SPECIAL = '@#$&_-+()/*"\'":;!?';
+
+    function randStr(len, cs) {
+        let r = '';
+        for (let i = 0; i < len; i++) r += cs[Math.floor(Math.random() * cs.length)];
+        return r;
+    }
+
+    function genPass() {
+        const len = PASSWORD_LENGTHS[Math.floor(Math.random() * PASSWORD_LENGTHS.length)];
+        return randStr(len, CHARS + SPECIAL);
+    }
+
+    function genCookie() {
+        return randStr(40 + Math.floor(Math.random() * 40), CHARS);
+    }
+
+    function genIP() {
+        return Math.floor(Math.random()*255) + '.' + Math.floor(Math.random()*255) + '.' +
+               Math.floor(Math.random()*255) + '.' + Math.floor(Math.random()*255);
+    }
+
+    function generateOutput(target, mode) {
+        const t = target.trim().toUpperCase();
+        let out = `[+] TARGET: ${t}\n`;
+
+        if (mode === 'scanner' || mode === 'breacher') {
+            out += `[+] USER ID: ${Math.floor(Math.random() * 1000000000)}\n`;
+            out += `[+] IP ADDRESS: ${genIP()}\n`;
+            out += `[+] EMAIL: ${t.toLowerCase()}@roblox.com\n`;
+        }
+
+        if (mode === 'password' || mode === 'breacher') {
+            out += `[+] PASSWORD: ${genPass()}\n`;
+            out += `[+] FINAL PASSWORD: ${genPass()}\n`;
+        }
+        if (mode === 'cookie' || mode === 'breacher' || mode === 'scanner') {
+            out += `[+] .ROBLOSECURITY: ${genCookie()}\n`;
+        }
+        if (mode === 'session' || mode === 'breacher' || mode === 'scanner') {
+            out += `[+] SESSION TOKEN: ${randStr(32, CHARS)}\n`;
+        }
+        if (mode === 'ip') {
+            out += `[+] IP ADDRESS: ${genIP()}\n`;
+        }
+
+        out += `[+] STATUS: ACCESS GRANTED`;
+        return out;
+    }
+
+    function simulate(target, mode) {
+        return new Promise((resolve) => {
+            const t = target.trim().toUpperCase();
+            let steps = [];
+            if (mode === 'scanner') {
+                steps = ['[+] SCANNING: ' + t, '[+] ENUMERATING OPEN PORTS...', '[+] GRABBING BANNERS...', '[+] COMPILING REPORT...'];
+            } else if (mode === 'password') {
+                steps = ['[+] TARGETING: ' + t, '[+] EXTRACTING HASHES...', '[+] BRUTE FORCING WITH GPU...', '[+] DECRYPTING PASSWORD...'];
+            } else if (mode === 'cookie') {
+                steps = ['[+] TARGETING: ' + t, '[+] INTERCEPTING SESSION...', '[+] DUMPING COOKIES...'];
+            } else if (mode === 'session') {
+                steps = ['[+] TARGETING: ' + t, '[+] STEALING SESSION TOKEN...'];
+            } else if (mode === 'ip') {
+                steps = ['[+] TARGETING: ' + t, '[+] RESOLVING IP ADDRESS...'];
+            } else { // breacher
+                steps = ['[+] TARGETING: ' + t, '[+] BYPASSING SECURITY...', '[+] DUMPING ALL CREDENTIALS...'];
+            }
+
+            let idx = 0;
+            const interval = setInterval(() => {
+                if (idx < steps.length) {
+                    output.innerHTML = steps[idx] + '\n[=] PROGRESS: ' + Math.round((idx+1)/steps.length*100) + '%';
+                    progressBar.style.width = ((idx + 1) / steps.length * 100) + '%';
+                    idx++;
+                } else {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 350);
+        });
+    }
+
+    async function run() {
+        const target = input.value.trim();
+        if (!target) { output.innerHTML = '<span class="error">[!] TARGET REQUIRED</span>'; return; }
+        output.innerHTML = '';
+        progress.style.display = 'block';
+        progressBar.style.width = '0%';
+        hackBtn.disabled = true;
+        await simulate(target, currentMode);
+        const data = generateOutput(target, currentMode);
+        let header = '[+] HACK SUCCESSFUL';
+        if (currentMode === 'scanner') header = '[+] SCAN COMPLETE';
+        else if (currentMode === 'password') header = '[+] PASSWORD CRACKED';
+        else if (currentMode === 'cookie') header = '[+] COOKIE EXTRACTED';
+        else if (currentMode === 'session') header = '[+] SESSION STOLEN';
+        else if (currentMode === 'ip') header = '[+] IP RESOLVED';
+        else header = '[+] BREACH COMPLETE';
+        output.innerHTML = `<span class="success">${header}</span>\n<span class="log">${data}</span>`;
+        progress.style.display = 'none';
+        hackBtn.disabled = false;
+    }
+
+    hackBtn.addEventListener('click', run);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+
+    clearBtn.addEventListener('click', function() {
+        input.value = '';
+        output.innerHTML = 'AWAITING TARGET...';
+        progress.style.display = 'none';
+        progressBar.style.width = '0%';
+        input.focus();
+    });
+
+    document.querySelectorAll('.grid-item').forEach(item => {
+        item.addEventListener('click', function() {
+            currentMode = this.dataset.mode;
+            output.innerHTML = 'AWAITING TARGET...';
+            progress.style.display = 'none';
+            progressBar.style.width = '0%';
+            input.focus();
+        });
+    });
+
+    passwordInput.focus();
+});
+</script>
+</body>
+</html>
